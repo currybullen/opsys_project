@@ -3,10 +3,7 @@
 #include <linux/init.h>    /* Needed for __init and __exit macros. */
 #include <linux/slab.h>    /* kmalloc */
 #include <linux/hashtable.h>
-#include "entrypoint.h"
-
-//static int HT_SIZE = 8;
-static DEFINE_HASHTABLE(ht, 5);
+#include "kvs_ht.h"
 
 static int __init onload(void) {
     printk(KERN_EMERG "Loadable module initialized\n");
@@ -17,7 +14,7 @@ static void __exit onunload(void) {
     printk(KERN_EMERG "Loadable module removed\n");
 }
 
-void run_tests(void) {
+static void run_tests(void) {
     int value = 5;
     int key = 7;
     int fetched_value = 0;
@@ -26,27 +23,6 @@ void run_tests(void) {
 
     fetched_value = get(key);
     printk(KERN_INFO "Found value  %d for key %d.\n.", fetched_value, key);
-}
-
-//make static? also implement mem allocation here
-void put(int value, int key) {
-    kvs_entry_t kvs_entry = {
-        .value = value,
-        .key = key
-    };
-
-    hash_add(ht, &kvs_entry.next, key);
-}
-
-//make static, maybe shouldn't return -1?
-int get(int key) {
-    kvs_entry_t *kvs_entry;
-    hash_for_each_possible(ht, kvs_entry, next, key) {
-        if (kvs_entry->key == key)
-            return kvs_entry->value;
-    }
-
-    return -1;
 }
 
 module_init(onload);
