@@ -45,6 +45,15 @@ int* kvs_ht_get(int key) {
     return NULL;
 }
 
-void kvs_ht_remove(int key) {
-        
+bool kvs_ht_remove(int key) {
+    ht_entry_t* ht_entry;
+    hash_for_each_possible(ht, ht_entry, next, key) {
+        if (ht_entry->key == key) {
+            hash_del(&(ht_entry->next));
+            kfree(ht_entry);
+            return true;
+        }
+    }
+
+    return false;
 }
