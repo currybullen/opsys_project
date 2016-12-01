@@ -19,9 +19,9 @@ static void run_tests(void) {
     int key = 7;
     int fetched_value = 0;
     printk(KERN_INFO "Storing value %d with key %d.\n", value, key);
-    put(value, key);
+    kvs_ht_put(value, key);
 
-    fetched_value = get(key);
+    fetched_value = kvs_ht_get(key);
     printk(KERN_INFO "Found value  %d for key %d.\n.", fetched_value, key);
 }
 
