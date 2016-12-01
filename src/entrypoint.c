@@ -3,7 +3,7 @@
 #include <linux/init.h>    /* Needed for __init and __exit macros. */
 #include <linux/slab.h>    /* kmalloc */
 #include <linux/hashtable.h>
-#include "kvs.h"
+#include "entrypoint.h"
 
 //static int HT_SIZE = 8;
 static DEFINE_HASHTABLE(ht, 5);
