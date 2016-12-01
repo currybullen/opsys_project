@@ -1,5 +1,5 @@
 obj-m += kvs.o
-kvs-objs := entrypoint.o
+kvs-objs := entrypoint.o kvs_ht.o
 
 all:
 	make -C /lib/modules/$(shell uname -r)/build M=$(PWD) modules
