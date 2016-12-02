@@ -2,13 +2,14 @@
 #include <linux/hashtable.h>
 #include "kvs_ht.h"
 
+#define KVS_HT_SIZE 5
+static DEFINE_HASHTABLE(ht, KVS_HT_SIZE);
+
 typedef struct {
     int key;
     int value;
     struct hlist_node next;
 } ht_entry_t;
-
-static DEFINE_HASHTABLE(ht, 5);
 
 bool kvs_ht_put(int key, int value) {
     ht_entry_t* ht_entry;
