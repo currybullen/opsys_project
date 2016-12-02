@@ -50,3 +50,12 @@ bool kvs_ht_remove(int key) {
 
     return false;
 }
+
+void kvs_ht_cleanup(void) {
+    ht_entry_t* ht_entry;
+    int bkt;
+    hash_for_each(ht, bkt, ht_entry, next) {
+        hash_del(&(ht_entry->next));
+        kfree(ht_entry);
+    }
+}
