@@ -19,7 +19,7 @@ static void run_tests(void) {
     printk(KERN_INFO "Storing value %d with key %d.\n", value, key);
     kvs_ht_put(value, key);
 
-    fetched_value = *kvs_ht_get(key);
+    kvs_ht_get(key, &fetched_value);
     printk(KERN_INFO "Found value  %d for key %d.\n.", fetched_value, key);
 }
 

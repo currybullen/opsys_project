@@ -35,14 +35,16 @@ void kvs_ht_put(int key, int value) {
     hash_add(ht, &(ht_entry->next), key);
 }
 
-int* kvs_ht_get(int key) {
+bool kvs_ht_get(int key, int* value) {
     ht_entry_t* ht_entry;
     hash_for_each_possible(ht, ht_entry, next, key) {
-        if (ht_entry->key == key)
-            return &(ht_entry->value);
+        if (ht_entry->key == key) {
+            *value = ht_entry->value;
+            return true;
+        }
     }
 
-    return NULL;
+    return false;
 }
 
 bool kvs_ht_remove(int key) {
