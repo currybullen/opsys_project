@@ -5,4 +5,4 @@ all:
 
 clean:
 	cd src && make clean
-	rm test/*.o
+	rm out/*
