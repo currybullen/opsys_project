@@ -17,7 +17,7 @@ static inline void serialize(int value, char dest[], int offset) {
     dest[offset+3] = value & 0xFF;
 }
 
-static inline int deserialize(char src[], int offset) {
+static inline int deserialize(const char src[], int offset) {
     int ret = src[offset];
     ret = (ret << 8) + src[offset+1];
     ret = (ret << 8) + src[offset+2];
