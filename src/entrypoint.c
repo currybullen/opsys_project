@@ -44,11 +44,14 @@ static ssize_t device_read(struct file *filp,
 }
 
 static ssize_t device_write(struct file *filp, 
-                            const char *buff, 
+                            const char *buffer, 
                             size_t len, 
                             loff_t *offset) 
 {
-    switch(buff[0])
+    if (len == 0)
+        //return KVS_BAD_FORMAT
+
+    switch(buffer[0])
     {
         case KVS_PUT :
             //handle_put(buff, len, msg);
