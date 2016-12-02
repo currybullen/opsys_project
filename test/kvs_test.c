@@ -3,18 +3,19 @@
 #include <unistd.h>
 #include <fcntl.h>
 #include <stdbool.h>
+#include "kvs_helper.h"
 
-#define KVS_PUT 1
-#define KVS_PUT_OK 2
-#define KV_PUT_FAIL 3
-
-#define KVS_GET 4
-#define KVS_GET_OK 5
-#define KVS_GET_FAIL 6
-
-#define KVS_DEL 7
-#define KVS_DEL_OK 8
-#define KVS_DEL_FAIL = 9
+//#define KVS_PUT 1
+//#define KVS_PUT_OK 2
+//#define KV_PUT_FAIL 3
+//
+//#define KVS_GET 4
+//#define KVS_GET_OK 5
+//#define KVS_GET_FAIL 6
+//
+//#define KVS_DEL 7
+//#define KVS_DEL_OK 8
+//#define KVS_DEL_FAIL = 9
 
 static char* KVS_PATH = "/dev/kvs";
 
@@ -23,8 +24,8 @@ bool get(int key, int *value);
 bool delete(int key);
 void run_tests();
 
-static void serialize(int value, char dest[], int offset);
-static int deserialize(char src[], int offset);
+//static void serialize(int value, char dest[], int offset);
+//static int deserialize(char src[], int offset);
 static void write_read(char write_buf[], int write_size, 
         char read_buf[], int read_size);
 
@@ -76,21 +77,21 @@ bool delete(int key) {
     return (buffer[0] == KVS_DEL_OK);
 }
 
-void serialize(int value, char dest[], int offset) {
-    dest[offset] = (value >> 24) & 0xFF;
-    dest[offset+1] = (value >> 16) & 0xFF;
-    dest[offset+2] = (value >> 8) & 0xFF;
-    dest[offset+3] = value & 0xFF;
-}
-
-static int deserialize(char src[], int offset) {
-    int ret = src[offset];
-    ret = (ret << 8) + src[offset+1];
-    ret = (ret << 8) + src[offset+2];
-    ret = (ret << 8) + src[offset+3];
-
-    return ret;
-}
+//void serialize(int value, char dest[], int offset) {
+//    dest[offset] = (value >> 24) & 0xFF;
+//    dest[offset+1] = (value >> 16) & 0xFF;
+//    dest[offset+2] = (value >> 8) & 0xFF;
+//    dest[offset+3] = value & 0xFF;
+//}
+//
+//static int deserialize(char src[], int offset) {
+//    int ret = src[offset];
+//    ret = (ret << 8) + src[offset+1];
+//    ret = (ret << 8) + src[offset+2];
+//    ret = (ret << 8) + src[offset+3];
+//
+//    return ret;
+//}
 
 static void write_read(char write_buf[], int write_size, 
         char read_buf[], int read_size) {
