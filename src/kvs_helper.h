@@ -25,3 +25,9 @@ static inline int deserialize(const char src[], int offset) {
 
     return ret;
 }
+
+typedef struct {
+    int key;
+    int value;
+    int status
+} kvs_msg;
