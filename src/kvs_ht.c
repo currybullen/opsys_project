@@ -11,12 +11,15 @@ typedef struct {
     struct hlist_node next;
 } ht_entry_t;
 
-bool kvs_ht_put(int key, int value) {
+bool kvs_ht_put(int key, int value, int *old_value) {
     ht_entry_t* ht_entry;
     int tmp;
 
-    if (kvs_ht_get(key, &tmp) && tmp == value) 
+    if (kvs_ht_get(key, &tmp)) {
+        if (old_value != NULL)
+            *old_value = tmp;
         return false;
+    }
 
     ht_entry = kmalloc(sizeof(ht_entry_t), GFP_KERNEL);
     ht_entry->key = key;
@@ -38,10 +41,12 @@ bool kvs_ht_get(int key, int* value) {
     return false;
 }
 
-bool kvs_ht_remove(int key) {
+bool kvs_ht_remove(int key, int *old_value) {
     ht_entry_t* ht_entry;
     hash_for_each_possible(ht, ht_entry, next, key) {
         if (ht_entry->key == key) {
+            if (old_value != NULL)
+                *old_value = ht_entry->value;
             hash_del(&(ht_entry->next));
             kfree(ht_entry);
             return true;

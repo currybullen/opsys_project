@@ -51,7 +51,7 @@ long device_ioctl(struct file *file,
     switch (ioctl_num) {
     case IOCTL_KVS_PUT:
         printk(KERN_INFO "Performing KVS_PUT action");
-        if (!kvs_ht_put(src.key, src.value))
+        if (!kvs_ht_put(src.key, src.value, NULL))
             src.status = KVS_FAIL;
         return copy_msg_to_user(src, dst);
     case IOCTL_KVS_GET:
@@ -61,7 +61,7 @@ long device_ioctl(struct file *file,
         return copy_msg_to_user(src, dst);
     case IOCTL_KVS_DEL:
         printk(KERN_INFO "Performing KVS_DEL action");
-        if (!kvs_ht_remove(src.key))
+        if (!kvs_ht_remove(src.key, NULL))
             src.status = KVS_FAIL;
         return copy_msg_to_user(src, dst);
     default:
