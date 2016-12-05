@@ -12,9 +12,9 @@ typedef struct {
 #define IOCTL_KVS_DEL _IOWR(KVS_MAJOR_NUM, 2, kvs_msg_t *)
 
 #define KVS_BAD_ADDRESS 10
-#define KVS_SUCCESS 0;
-#define KVS_FAIL 11;
-#define KVS_UNRECOGNIZED 12;
+#define KVS_SUCCESS 0
+#define KVS_FAIL 11
+#define KVS_UNRECOGNIZED 12
 
 
 static inline void serialize(int value, char dest[], int offset) {
