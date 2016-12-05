@@ -70,6 +70,7 @@ long device_ioctl(struct file *file,
 static long copy_msg_to_user(kvs_msg_t src, 
                              kvs_msg_t *dst) 
 {
+    printk(KERN_INFO "Copying return values to user space.\n");
     if (put_user(src.key, &(dst->key)))
         return KVS_BAD_ADDRESS;
     if (put_user(src.value, &(dst->value)))
