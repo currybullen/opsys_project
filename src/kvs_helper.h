@@ -6,6 +6,7 @@ typedef struct {
     int status;
 } kvs_msg_t;
 
+#define DEVICE_NAME "kvs"
 #define KVS_MAJOR_NUM 300
 #define IOCTL_KVS_PUT _IOWR(KVS_MAJOR_NUM, 0, kvs_msg_t *)
 #define IOCTL_KVS_GET _IOWR(KVS_MAJOR_NUM, 1, kvs_msg_t *)

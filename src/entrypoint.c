@@ -6,8 +6,6 @@
 #include "kvs_helper.h"
 #include "kvs_ht.h"
 
-#define DEVICE_NAME "kvs"
-
 static int device_open(struct inode *, struct file *);
 static int device_release(struct inode *, struct file *);
 long device_ioctl(struct file *file,
@@ -83,11 +81,11 @@ static long copy_msg_to_user(kvs_msg_t src,
 
 static int __init onload(void) {
     int ret_val;
-    ret_val = register_chrdev(KVS_MAJOR_NUM, DEVICE_NAME, &fops);
+    ret_val = register_chrdev(KVS_MAJOR_NUM, KVS_DEVICE_NAME, &fops);
     if (ret_val < 0)
-        printk(KERN_ALERT "Registering character device %s with major %d failed with %d.\n", DEVICE_NAME, KVS_MAJOR_NUM, ret_val);
+        printk(KERN_ALERT "Registering character device %s with major %d failed with %d.\n", KVS_DEVICE_NAME, KVS_MAJOR_NUM, ret_val);
     else
-        printk(KERN_INFO "Successfully registered character device %s with major %d\n", DEVICE_NAME, KVS_MAJOR_NUM);
+        printk(KERN_INFO "Successfully registered character device %s with major %d\n", KVS_DEVICE_NAME, KVS_MAJOR_NUM);
     printk(KERN_EMERG "Loadable module initialized\n");
     return 0;
 }
@@ -95,7 +93,7 @@ static int __init onload(void) {
 static void __exit onunload(void) {
     unregister_chrdev(KVS_MAJOR_NUM, DEVICE_NAME);
     kvs_ht_cleanup();
-    printk(KERN_INFO "Successfully unregistered character device %s with major %d.\n", DEVICE_NAME, KVS_MAJOR_NUM);
+    printk(KERN_INFO "Successfully unregistered character device %s with major %d.\n", KVS_DEVICE_NAME, KVS_MAJOR_NUM);
     printk(KERN_EMERG "Loadable module removed\n");
 }
 
