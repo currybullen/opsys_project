@@ -1,14 +1,21 @@
-#define KVS_PUT 1
-#define KVS_PUT_OK 2
-#define KV_PUT_FAIL 3
+#include <linux/ioctl.h>
 
-#define KVS_GET 4
-#define KVS_GET_OK 5
-#define KVS_GET_FAIL 6
+typedef struct {
+    int key;
+    int value;
+    int status;
+} kvs_msg_t;
 
-#define KVS_DEL 7
-#define KVS_DEL_OK 8
-#define KVS_DEL_FAIL = 9
+#define KVS_MAJOR_NUM 300
+#define IOCTL_KVS_PUT _IOWR(KVS_MAJOR_NUM, 0, kvs_msg_t *)
+#define IOCTL_KVS_GET _IOWR(KVS_MAJOR_NUM, 1, kvs_msg_t *)
+#define IOCTL_KVS_DEL _IOWR(KVS_MAJOR_NUM, 2, kvs_msg_t *)
+
+#define KVS_BAD_ADDRESS 10
+#define KVS_SUCCESS 0;
+#define KVS_FAIL 11;
+#define KVS_UNRECOGNIZED 12;
+
 
 static inline void serialize(int value, char dest[], int offset) {
     dest[offset] = (value >> 24) & 0xFF;
@@ -26,8 +33,3 @@ static inline int deserialize(const char src[], int offset) {
     return ret;
 }
 
-typedef struct {
-    int key;
-    int value;
-    int status
-} kvs_msg;
