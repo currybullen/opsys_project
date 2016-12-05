@@ -39,22 +39,28 @@ long device_ioctl(struct file *file,
     kvs_msg_t *dst = (kvs_msg_t *) ioctl_param;
     kvs_msg_t src;
 
-    if (!get_user(src.key, &(dst->key)))
+    printk(KERN_INFO "Copying parameters info to kernel space.\n");
+    if (get_user(src.key, &(dst->key)))
         return KVS_BAD_ADDRESS;
-    if (!get_user(src.value, &(dst->value)))
+    if (get_user(src.value, &(dst->value)))
         return KVS_BAD_ADDRESS;
     src.status = KVS_SUCCESS;
 
+    printk(KERN_INFO "Copying done!\n");
+
     switch (ioctl_num) {
     case IOCTL_KVS_PUT:
+        printk(KERN_INFO "Performing KVS_PUT action");
         if (!kvs_ht_put(src.key, src.value))
             src.status = KVS_FAIL;
         return copy_msg_to_user(src, dst);
     case IOCTL_KVS_GET:
+        printk(KERN_INFO "Performing KVS_GET action");
         if (!kvs_ht_get(src.key, &(src.value)))
             src.status = KVS_FAIL;
         return copy_msg_to_user(src, dst);
     case IOCTL_KVS_DEL:
+        printk(KERN_INFO "Performing KVS_DEL action");
         if (!kvs_ht_remove(src.key))
             src.status = KVS_FAIL;
         return copy_msg_to_user(src, dst);
@@ -66,11 +72,11 @@ long device_ioctl(struct file *file,
 static long copy_msg_to_user(kvs_msg_t src, 
                              kvs_msg_t *dst) 
 {
-    if (!put_user(src.key, &(dst->key)))
+    if (put_user(src.key, &(dst->key)))
         return KVS_BAD_ADDRESS;
-    if (!put_user(src.value, &(dst->value)))
+    if (put_user(src.value, &(dst->value)))
         return KVS_BAD_ADDRESS;
-    if (!put_user(src.value, &(dst->status)))
+    if (put_user(src.status, &(dst->status)))
         return KVS_BAD_ADDRESS;
     return KVS_SUCCESS;
 }
@@ -79,12 +85,17 @@ static int __init onload(void) {
     int ret_val;
     ret_val = register_chrdev(KVS_MAJOR_NUM, DEVICE_NAME, &fops);
     if (ret_val < 0)
-        printk(KERN_ALERT "Registering the character device failed with %d.", ret_val);
+        printk(KERN_ALERT "Registering character device %s with major %d failed with %d.\n", DEVICE_NAME, KVS_MAJOR_NUM, ret_val);
+    else
+        printk(KERN_INFO "Successfully registered character device %s with major %d\n", DEVICE_NAME, KVS_MAJOR_NUM);
     printk(KERN_EMERG "Loadable module initialized\n");
     return 0;
 }
 
 static void __exit onunload(void) {
+    unregister_chrdev(KVS_MAJOR_NUM, DEVICE_NAME);
+    kvs_ht_cleanup();
+    printk(KERN_INFO "Successfully unregistered character device %s with major %d.\n", DEVICE_NAME, KVS_MAJOR_NUM);
     printk(KERN_EMERG "Loadable module removed\n");
 }
 
