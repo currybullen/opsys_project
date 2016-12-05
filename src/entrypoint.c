@@ -92,7 +92,7 @@ static int __init onload(void) {
 }
 
 static void __exit onunload(void) {
-    unregister_chrdev(KVS_MAJOR_NUM, DEVICE_NAME);
+    unregister_chrdev(KVS_MAJOR_NUM, KVS_DEVICE_NAME);
     kvs_ht_cleanup();
     printk(KERN_INFO "Successfully unregistered character device %s with major %d.\n", KVS_DEVICE_NAME, KVS_MAJOR_NUM);
     printk(KERN_EMERG "Loadable module removed\n");
