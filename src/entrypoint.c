@@ -53,17 +53,17 @@ long device_ioctl(struct file *file,
 
     switch (ioctl_num) {
     case IOCTL_KVS_PUT:
-        printk(KERN_INFO "Performing KVS_PUT action");
+        printk(KERN_INFO "Performing KVS_PUT action\n");
         if (!kvs_ht_put(src.key, src.value, NULL))
             src.status = KVS_FAIL;
         return copy_msg_to_user(src, dst);
-    case IOCTL_KV S_GET:
-        printk(KERN_INFO "Performing KVS_GET action");
+    case IOCTL_KVS_GET:
+        printk(KERN_INFO "Performing KVS_GET action\n");
         if (!kvs_ht_get(src.key, &(src.value)))
             src.status = KVS_FAIL;
         return copy_msg_to_user(src, dst);
     case IOCTL_KVS_DEL:
-        printk(KERN_INFO "Performing KVS_DEL action");
+        printk(KERN_INFO "Performing KVS_DEL action\n");
         if (!kvs_ht_remove(src.key, NULL))
             src.status = KVS_FAIL;
         return copy_msg_to_user(src, dst);
@@ -114,6 +114,8 @@ static int __init onload(void) {
         printk(KERN_ALERT "Failed to create the device\n");
         return PTR_ERR(kvs_char_device);
     }
+
+    kvs_ht_init();
     printk(KERN_EMERG "Loadable module initialized\n");
     return 0;
 }

@@ -4,4 +4,6 @@ bool kvs_ht_get(int key, int* value);
 
 bool kvs_ht_remove(int key, int *old_value);
 
+void kvs_ht_init(void);
+
 void kvs_ht_cleanup(void);

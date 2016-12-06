@@ -22,11 +22,17 @@ int main(int argc, char *argv[]) {
         printf("Can't open device file %s\n", KVS_PATH);
         exit(-1);
     }
-
-    test_put(99, 100);
-    test_get(99);
-    test_del(99);
-    test_get(99);
+    test_del(0);
+    int val = 0;
+    /*
+    while(1) {
+        test_put(0, val++);
+        test_del(0);
+    }*/
+    while (1) {
+        test_get(0);
+    }
+    //test_get(0);
 }
 
 void test_put(int key, int value) {
@@ -58,7 +64,7 @@ void test_get(int key) {
         if (msg.status == KVS_SUCCESS)
             printf("Returned message contained success code! Retrieved value %d for key %d.\n", msg.value, key);
         else
-            printf("Returned message contained fault code, could not retrieve value behind key %d.\n", key); 
+            printf("Returned message contained fault code, could not retrieve value behind key %d.\n", key);
     } else {
         printf("Get call returned %d, something is wrong.\n", ret_val);
     }
