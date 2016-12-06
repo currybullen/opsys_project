@@ -2,6 +2,7 @@
 #include <linux/kernel.h>
 #include <linux/init.h>
 #include <linux/fs.h>
+#include <linux/device.h>
 #include <asm/uaccess.h>
 #include "kvs_helper.h"
 #include "kvs_ht.h"
@@ -11,14 +12,18 @@ static int device_release(struct inode *, struct file *);
 long device_ioctl(struct file *file,
                   unsigned int ioctl_num,
                   unsigned long ioctl_param);
-static long copy_msg_to_user(kvs_msg_t src, 
-                             kvs_msg_t *dst); 
+static long copy_msg_to_user(kvs_msg_t src,
+                             kvs_msg_t *dst);
 
 static struct file_operations fops = {
     .open = device_open,
     .release = device_release,
     .unlocked_ioctl = device_ioctl
 };
+
+static struct class* kvs_char_class   = NULL; // The device-driver cass struct pointer
+static struct device* kvs_char_device = NULL; // The device-driver device struct pointer
+static DEFINE_MUTEX(kvs_mutex);
 
 static int device_open(struct inode *inode, struct file *file) {
     printk(KERN_INFO "device_open(%p)\n", file);
@@ -52,7 +57,7 @@ long device_ioctl(struct file *file,
         if (!kvs_ht_put(src.key, src.value, NULL))
             src.status = KVS_FAIL;
         return copy_msg_to_user(src, dst);
-    case IOCTL_KVS_GET:
+    case IOCTL_KV S_GET:
         printk(KERN_INFO "Performing KVS_GET action");
         if (!kvs_ht_get(src.key, &(src.value)))
             src.status = KVS_FAIL;
@@ -67,8 +72,8 @@ long device_ioctl(struct file *file,
     }
 }
 
-static long copy_msg_to_user(kvs_msg_t src, 
-                             kvs_msg_t *dst) 
+static long copy_msg_to_user(kvs_msg_t src,
+                             kvs_msg_t *dst)
 {
     printk(KERN_INFO "Copying return values to user space.\n");
     if (put_user(src.key, &(dst->key)))
@@ -82,16 +87,41 @@ static long copy_msg_to_user(kvs_msg_t src,
 
 static int __init onload(void) {
     int ret_val;
+
+    printk(KERN_INFO "Initializing the KVSchar LKM\n");
+
     ret_val = register_chrdev(KVS_MAJOR_NUM, KVS_DEVICE_NAME, &fops);
-    if (ret_val < 0)
+    if (ret_val < 0) {
         printk(KERN_ALERT "Registering character device %s with major %d failed with %d.\n", KVS_DEVICE_NAME, KVS_MAJOR_NUM, ret_val);
-    else
+        return ret_val;
+    }
+    else {
         printk(KERN_INFO "Successfully registered character device %s with major %d\n", KVS_DEVICE_NAME, KVS_MAJOR_NUM);
+    }
+
+    /* Register the device class */
+    kvs_char_class = class_create(THIS_MODULE, KVS_CLASS_NAME);
+    if (IS_ERR(kvs_char_class)) {
+        unregister_chrdev(KVS_MAJOR_NUM, KVS_DEVICE_NAME);
+        printk(KERN_ALERT "Failed to register device class\n");
+        return PTR_ERR(kvs_char_class);
+    }
+    /* Register the device driver */
+    kvs_char_device = device_create(kvs_char_class, NULL, MKDEV(KVS_MAJOR_NUM, 0), NULL, KVS_DEVICE_NAME);
+    if (IS_ERR(kvs_char_device)) {
+        class_destroy(kvs_char_class);
+        unregister_chrdev(KVS_MAJOR_NUM, KVS_DEVICE_NAME);
+        printk(KERN_ALERT "Failed to create the device\n");
+        return PTR_ERR(kvs_char_device);
+    }
     printk(KERN_EMERG "Loadable module initialized\n");
     return 0;
 }
 
 static void __exit onunload(void) {
+    device_destroy(kvs_char_class, MKDEV(KVS_MAJOR_NUM, 0));
+    class_unregister(kvs_char_class);
+    class_destroy(kvs_char_class);
     unregister_chrdev(KVS_MAJOR_NUM, KVS_DEVICE_NAME);
     kvs_ht_cleanup();
     printk(KERN_INFO "Successfully unregistered character device %s with major %d.\n", KVS_DEVICE_NAME, KVS_MAJOR_NUM);

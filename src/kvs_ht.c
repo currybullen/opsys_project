@@ -1,5 +1,6 @@
 #include <linux/slab.h>
 #include <linux/hashtable.h>
+#include <linux/mutex.h>
 #include "kvs_ht.h"
 
 #define KVS_HT_SIZE 5

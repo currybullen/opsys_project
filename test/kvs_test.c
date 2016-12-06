@@ -41,9 +41,9 @@ void test_put(int key, int value) {
         if (msg.status == KVS_SUCCESS)
             printf("Returned message contained success code! Stored value %d behind key %d.\n", value, key);
         else
-            printf("Returned message contained fault code, could not store value %d behind key %d.\n", value, key); 
+            printf("Returned message contained fault code, could not store value %d behind key %d.\n", value, key);
     } else {
-        printf("Put call returned %d, something is wrong.\n", ret_val); 
+        printf("Put call returned %d, something is wrong.\n", ret_val);
     }
 }
 
@@ -58,7 +58,7 @@ void test_get(int key) {
         if (msg.status == KVS_SUCCESS)
             printf("Returned message contained success code! Retrieved value %d for key %d.\n", msg.value, key);
         else
-            printf("Returned message contained fault code, could not retrieve value behind key %d", key); 
+            printf("Returned message contained fault code, could not retrieve value behind key %d.\n", key); 
     } else {
         printf("Get call returned %d, something is wrong.\n", ret_val);
     }
@@ -75,7 +75,7 @@ void test_del(int key) {
         if (msg.status == KVS_SUCCESS)
             printf("Returned message contained success code! Deleted value behind key %d.\n", key);
         else
-            printf("Returned message contained fault code, could not delete value behind key %d\n", key); 
+            printf("Returned message contained fault code, could not delete value behind key %d\n", key);
     } else {
         printf("Del call returned %d, something is wrong.\n", ret_val);
     }
