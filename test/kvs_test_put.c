@@ -22,23 +22,16 @@ int main(int argc, char *argv[]) {
         perror(KVS_PATH);
         exit(-1);
     }
-    sleep(10);
-    //test_get(2);
-    /*
     test_put(1, 1);
+    sleep(5);
     test_put(2, 4);
+    sleep(5);
     test_put(3, 9);
+    sleep(5);
     test_put(4, 16);
+    sleep(5);
     test_put(5, 25);
-    while(1) {
-    test_del(0);
-        test_del(0);
-    }*/
-    /*
-    while (1) {
-    }
-    */
-    //test_get(0);
+    close(fd);
 }
 
 void test_put(int key, int value) {

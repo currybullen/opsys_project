@@ -4,8 +4,10 @@
 #include <linux/fs.h>
 #include <linux/device.h>
 #include <asm/uaccess.h>
+#include <linux/delay.h>
 #include "kvs_helper.h"
 #include "kvs_ht.h"
+#include "kvs_file_helper.h"
 
 static int device_open(struct inode *, struct file *);
 static int device_release(struct inode *, struct file *);
@@ -15,10 +17,14 @@ long device_ioctl(struct file *file,
 static long copy_msg_to_user(kvs_msg_t src,
                              kvs_msg_t *dst);
 
+static void retrieve_data(void);
+static void store_data(void);
+
 static struct file_operations fops = {
     .open = device_open,
     .release = device_release,
-    .unlocked_ioctl = device_ioctl
+    .unlocked_ioctl = device_ioctl,
+    .owner = THIS_MODULE
 };
 
 static struct class* kvs_char_class   = NULL; // The device-driver cass struct pointer
@@ -41,7 +47,6 @@ long device_ioctl(struct file *file,
 {
     kvs_msg_t *dst = (kvs_msg_t *) ioctl_param;
     kvs_msg_t src;
-
     printk(KERN_INFO "Copying parameters info to kernel space.\n");
     if (get_user(src.key, &(dst->key)))
         return KVS_BAD_ADDRESS;
@@ -115,12 +120,64 @@ static int __init onload(void) {
         return PTR_ERR(kvs_char_device);
     }
 
+
     kvs_ht_init();
+    retrieve_data();
+
     printk(KERN_EMERG "Loadable module initialized\n");
     return 0;
 }
 
+static void retrieve_data(void) {
+    struct file *fp = file_open("/tmp/kvs_store", O_RDONLY, 0644);
+    size_t ht_size;
+    int key;
+    int value;
+
+    if (fp != NULL) {
+        char tmp[4];
+        file_read(fp, 0, tmp, sizeof(tmp));
+        ht_size = deserialize(tmp, 0);
+        printk("ht_size %d\n", ht_size);
+        char data[4+8*ht_size];
+        size_t i;
+        file_read(fp, 4, data, sizeof(data));
+        for (i = 0; i < ht_size; i++) {
+            key = deserialize(data, i*8);
+            value = deserialize(data, 4+i*8);
+            printk("key %d value %d\n", key, value);
+            kvs_ht_put(key, value, NULL);
+        }
+
+    } else {
+        printk("NOPE filepointer null\n");
+    }
+}
+
+static void store_data(void) {
+    struct file *fp = file_open("/tmp/kvs_store", O_WRONLY | O_CREAT | O_TRUNC, 0700);
+    size_t i;
+    size_t ht_size = kvs_ht_size();
+    int keys[ht_size];
+    int values[ht_size];
+    char data[4+8*ht_size];
+    if (fp != NULL) {
+        kvs_ht_entryset(keys, values, ht_size);
+        printk("key: %d, value: %d\n",keys[0],values[0]);
+        serialize(ht_size, data, 0);
+        for (i = 0; i < ht_size; i++) {
+            serialize(keys[i], data, 4+i*8);
+            serialize(values[i], data, 8+i*8);
+        }
+        file_write(fp, 0, data, sizeof(data));
+
+    } else {
+        printk("NOPE filepointer null\n");
+    }
+}
+
 static void __exit onunload(void) {
+    store_data();
     device_destroy(kvs_char_class, MKDEV(KVS_MAJOR_NUM, 0));
     class_unregister(kvs_char_class);
     class_destroy(kvs_char_class);
