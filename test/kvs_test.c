@@ -1,94 +1,118 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <unistd.h>
 #include <fcntl.h>
-#include <stdbool.h>
-#include <sys/ioctl.h>
-#include "kvs_helper.h"
+#include "kvs.h"
 
+static int TEST_KEY_1 = 55;
+static int TEST_VAL_1 = 76;
+static int TEST_KEY_2 = 5255;
+static int TEST_VAL_2 = 1976;
+static int TEST_KEY_3 = 6464;
+static int TEST_VAL_3 = 1515;
 
-static char* KVS_PATH = "/dev/kvs";
-static int fd;
+int main(int argc, char** argv) {
+    if (argc <= 1) {
+        printf("Missing device driver location!\n");
+        exit(1);
+    }
 
-void test_put(int key, int value);
-void test_get(int key);
-void test_del(int key);
-
-int main(int argc, char *argv[]) {
-    if (argc > 1)
-        KVS_PATH = argv[1];
-    fd = open(KVS_PATH, 0);
+    int fd = open(argv[1], 0);
     if (fd < 0) {
-        perror(KVS_PATH);
-        exit(-1);
+        printf("Bad device driver path '%s'!\n", argv[1]);
+        exit(2);
     }
-    sleep(10);
-    //test_get(2);
-    /*
-    test_put(1, 1);
-    test_put(2, 4);
-    test_put(3, 9);
-    test_put(4, 16);
-    test_put(5, 25);
-    while(1) {
-    test_del(0);
-        test_del(0);
-    }*/
-    /*
-    while (1) {
+
+    int response;
+
+    printf("Attempting to store value %d behind key %d\n", TEST_KEY_1, TEST_VAL_1);
+    response = put(fd, TEST_KEY_1, TEST_VAL_1);
+    if (response == FAIL) {
+        printf("Could not store value %d behind key %d, something went wront, exiting\n", TEST_KEY_1, TEST_VAL_1);
+        exit(3);
     }
-    */
-    //test_get(0);
-}
+    printf("Successfully stored value %d behind key %d\n", TEST_KEY_1, TEST_VAL_1);
+    printf("\n");
 
-void test_put(int key, int value) {
-    kvs_msg_t msg;
-    msg.key = key;
-    msg.value = value;
-
-    printf("Attempting to store value %d behind key %d.\n", msg.key, msg.value);
-    int ret_val = ioctl(fd, IOCTL_KVS_PUT, &msg);
-    if (ret_val == KVS_SUCCESS) {
-        printf("Put call returned success!\n");
-        if (msg.status == KVS_SUCCESS)
-            printf("Returned message contained success code! Stored value %d behind key %d.\n", value, key);
-        else
-            printf("Returned message contained fault code, could not store value %d behind key %d.\n", value, key);
-    } else {
-        printf("Put call returned %d, something is wrong.\n", ret_val);
+    printf("Attempting to store value %d behind key %d\n", TEST_KEY_2, TEST_VAL_2);
+    response = put(fd, TEST_KEY_2, TEST_VAL_2);
+    if (response == FAIL) {
+        printf("Could not store value %d behind key %d, something went wront, exiting\n", TEST_KEY_2, TEST_VAL_2);
+        exit(4);
     }
-}
+    printf("Successfully stored value %d behind key %d\n", TEST_KEY_2, TEST_VAL_2);
+    printf("\n");
 
-void test_get(int key) {
-    kvs_msg_t msg;
-    msg.key = key;
+    int val;
 
-    printf("Attempting to retrieve value behind key %d.\n", key);
-    int ret_val = ioctl(fd, IOCTL_KVS_GET, &msg);
-    if (ret_val == KVS_SUCCESS) {
-        printf("Get call returned success!\n");
-        if (msg.status == KVS_SUCCESS)
-            printf("Returned message contained success code! Retrieved value %d for key %d.\n", msg.value, key);
-        else
-            printf("Returned message contained fault code, could not retrieve value behind key %d.\n", key);
-    } else {
-        printf("Get call returned %d, something is wrong.\n", ret_val);
-    }
-}
+    printf("Attempting to retrieve value behind key %d\n", TEST_KEY_1);
+    response = get(fd, TEST_KEY_1, &val);
+    if (response == FAIL) {
+        printf("Could not retrieve value behind key %d, something went wrong, exiting\n", TEST_KEY_1);
+        exit(5);
+    } 
+    printf("Found value %d behind key %d\n", val, TEST_KEY_1);
+    printf("\n");
 
-void test_del(int key) {
-    kvs_msg_t msg;
-    msg.key = key;
+    printf("Attempting to retrieve value behind key %d.\n", TEST_KEY_2);
+    response = get(fd, TEST_KEY_2, &val);
+    if (response == FAIL) {
+        printf("Could not retrieve value behind key %d, something went wrong, exiting\n", TEST_KEY_2);
+        exit(5);
+    } 
+    printf("Found value %d behind key %d\n", val, TEST_KEY_2);
+    printf("\n");
 
-    printf("Attempting to delete value behind key %d.\n", key);
-    int ret_val = ioctl(fd, IOCTL_KVS_DEL, &msg);
-    if (ret_val == KVS_SUCCESS) {
-        printf("Del call returned success!\n");
-        if (msg.status == KVS_SUCCESS)
-            printf("Returned message contained success code! Deleted value behind key %d.\n", key);
-        else
-            printf("Returned message contained fault code, could not delete value behind key %d\n", key);
-    } else {
-        printf("Del call returned %d, something is wrong.\n", ret_val);
-    }
+    
+    printf("Attempting to delete value behind key %d.\n", TEST_KEY_1);
+    response = delete(fd, TEST_KEY_1);
+    if (response == FAIL) {
+        printf("Could not delete value behind key %d, something went wrong, exiting\n", TEST_KEY_1);
+        exit(6);
+    } 
+    printf("Deleted value behind key %d\n", TEST_KEY_1);
+    printf("\n");
+
+    printf("Attempting to retrieve value behind key %d\n", TEST_KEY_1);
+    response = get(fd, TEST_KEY_1, &val);
+    if (response == SUCCESS) {
+        printf("Was able to retrieve value behind key %d, something went wrong, exiting\n", TEST_KEY_1);
+        exit(7);
+    } 
+    printf("Found no value behind key %d\n", TEST_KEY_1);
+    printf("\n");
+
+    printf("Attempting to delete value behind key %d.\n", TEST_KEY_2);
+    response = delete(fd, TEST_KEY_2);
+    if (response == FAIL) {
+        printf("Could not delete value behind key %d, something went wrong, exiting\n", TEST_KEY_2);
+        exit(8);
+    } 
+    printf("Deleted value behind key %d\n", TEST_KEY_2);
+    printf("\n");
+
+    printf("Attempting to retrieve value behind key %d\n", TEST_KEY_2);
+    response = get(fd, TEST_KEY_2, &val);
+    if (response == SUCCESS) {
+        printf("Was able to retrieve value behind key %d, something went wrong, exiting\n", TEST_KEY_2);
+        exit(9);
+    } 
+    printf("Found no value behind key %d\n", TEST_KEY_2);
+    printf("\n");
+
+    printf("Attempting to store value %d behind key %d\n", TEST_KEY_3, TEST_VAL_3);
+    response = put(fd, TEST_KEY_3, TEST_VAL_3);
+    if (response == FAIL)
+        printf("Could not store value %d behind key %d, was the value stored previously?\n", TEST_KEY_3, TEST_VAL_3);
+    else
+        printf("Successfully stored value %d behind key %d\n", TEST_KEY_3, TEST_VAL_3);
+    printf("\n");
+
+    printf("Attempting to retrieve value behind key %d\n", TEST_KEY_3);
+    response = get(fd, TEST_KEY_3, &val);
+    if (response == FAIL) {
+        printf("Could not retrieve value behind key %d, something went wrong, exiting\n", TEST_KEY_3);
+        exit(5);
+    } 
+    printf("Found value %d behind key %d\n", val, TEST_KEY_3);
+    printf("\n");
 }
