@@ -1,8 +1,7 @@
 all:
 	cd src && make
 	cp src/kvs.ko out/
-	gcc -std=c99 -Wall -I src/ test/kvs_test.c -o out/kvs_test.o
-	gcc -std=c99 -Wall -I src/ test/kvs_test_put.c -o out/kvs_test_put.o
+	gcc -std=c99 -Wall -I src/ test/kvs.c test/kvs_test.c -o out/kvs.o
 
 clean:
 	cd src && make clean
